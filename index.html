@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Генератор подписок</title>
+<style>
+  :root{
+    --paper:#f5f1e8;
+    --card:#fffdf9;
+    --ink:#1d1b18;
+    --ink-soft:#4a443c;
+    --muted:#7c746a;
+    --line:#e3dccd;
+    --line-soft:#ece6d9;
+    --line-strong:#d3c9b5;
+    --ok:#3e6b4d;
+    --bad:#9c4634;
+    --mono:ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --serif:Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  }
+
+  *{box-sizing:border-box}
+
+  html{-webkit-text-size-adjust:100%}
+
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size:15px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  button{font-family:inherit}
+
+  .wrap{
+    max-width:1060px;
+    margin:0 auto;
+    padding:0 24px 90px;
+  }
+
+  /* ---------- шапка ---------- */
+
+  .site-head{
+    padding:62px 0 34px;
+    border-bottom:1px solid var(--line);
+  }
+
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    font-weight:700;
+    color:#a2988a;
+    margin-bottom:14px;
+  }
+
+  h1{
+    font-family:var(--serif);
+    font-weight:400;
+    font-size:clamp(30px, 4.6vw, 44px);
+    line-height:1.08;
+    letter-spacing:-.015em;
+    margin:0 0 14px;
+  }
+
+  .lede{
+    max-width:60ch;
+    margin:0;
+    color:var(--muted);
+    font-size:15.5px;
+  }
+
+  /* ---------- панель запуска ---------- */
+
+  .bar{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    flex-wrap:wrap;
+    margin-top:26px;
+    padding:16px 18px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+  }
+
+  .btn-primary{
+    appearance:none;
+    border:1px solid var(--ink);
+    background:var(--ink);
+    color:#f7f3ea;
+    font-size:14px;
+    font-weight:600;
+    letter-spacing:.01em;
+    padding:11px 22px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:background .16s ease, transform .1s ease;
+  }
+  .btn-primary:hover{background:#35302a}
+  .btn-primary:active{transform:translateY(1px)}
+
+  .stats{
+    margin-left:auto;
+    font-size:13.5px;
+    color:var(--muted);
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .stats b{
+    font-weight:600;
+    color:var(--ink);
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* ---------- результаты ---------- */
+
+  .results{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px 16px;
+    margin-top:20px;
+  }
+
+  .col{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    min-width:0;
+  }
+
+  .empty-state{
+    margin-top:20px;
+    padding:38px 20px;
+    text-align:center;
+    color:#8f8678;
+    font-size:14px;
+    background:#fbf8f2;
+    border:1px dashed var(--line-strong);
+    border-radius:12px;
+  }
+
+  .link-card{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 13px;
+    transition:opacity .18s ease, transform .18s ease, border-color .18s ease, background .18s ease;
+  }
+
+  .link-card.is-working{
+    border-color:#c3d8c9;
+    background:#f8fbf8;
+  }
+
+  .link-card.is-out{
+    opacity:0;
+    transform:translateY(-6px);
+    pointer-events:none;
+  }
+
+  .link-num{
+    flex:none;
+    width:18px;
+    padding-top:2px;
+    font-family:var(--mono);
+    font-size:11px;
+    font-weight:600;
+    color:#b3aa9c;
+    font-variant-numeric:tabular-nums;
+  }
+
+  .link-body{flex:1; min-width:0}
+
+  .link-text{
+    font-family:var(--mono);
+    font-size:12.5px;
+    line-height:1.55;
+    color:#2a2620;
+    word-break:break-all;
+    overflow-wrap:anywhere;
+  }
+
+  .link-prefix{color:#a89e90}
+
+  .link-meta{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    flex-wrap:wrap;
+    margin-top:7px;
+  }
+
+  .link-len{
+    font-size:11.5px;
+    color:#a89e90;
+    font-variant-numeric:tabular-nums;
+  }
+
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:.07em;
+    text-transform:uppercase;
+    padding:2px 7px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .pill.ok{background:#e4efe6; color:#33604a}
+  .pill.dup{background:#f5edda; color:#8a6a34}
+
+  .link-actions{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    margin-top:9px;
+  }
+
+  .btn-xs{
+    appearance:none;
+    font-size:12px;
+    font-weight:600;
+    line-height:1.2;
+    padding:5px 10px;
+    border-radius:6px;
+    cursor:pointer;
+    border:1px solid #ded6c7;
+    background:#faf7f1;
+    color:var(--ink-soft);
+    transition:background .14s ease, border-color .14s ease, color .14s ease;
+  }
+  .btn-xs:hover{border-color:#c9bda7; background:#f3eee4}
+  .btn-xs:disabled{opacity:.45; cursor:default}
+  .btn-xs:disabled:hover{border-color:#ded6c7; background:#faf7f1}
+  .btn-xs.ok:hover{border-color:var(--ok); color:#2f5a3d; background:#eef4ef}
+  .btn-xs.bad:hover{border-color:var(--bad); color:#8a3b2b; background:#f8eeeb}
+  .btn-xs.danger:hover{border-color:var(--bad); color:#8a3b2b; background:#f8eeeb}
+
+  /* ---------- панели ---------- */
+
+  .panel{
+    margin-top:34px;
+    padding:22px 22px 24px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+  }
+
+  .panel-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+  }
+
+  .panel-head h2{
+    font-family:var(--serif);
+    font-weight:400;
+    font-size:19px;
+    letter-spacing:-.01em;
+    margin:0;
+  }
+
+  .badge{
+    font-size:11px;
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+    color:#8a8175;
+    background:#f2ece0;
+    border-radius:999px;
+    padding:2px 8px;
+  }
+
+  .grow{flex:1}
+
+  /* ---------- настройки ---------- */
+
+  .fields{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    gap:26px 34px;
+  }
+
+  .field-label{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:#8f8678;
+    margin-bottom:9px;
+  }
+
+  .stepper{
+    display:inline-flex;
+    align-items:center;
+    border:1px solid #ded6c7;
+    border-radius:8px;
+    background:#faf7f1;
+    overflow:hidden;
+  }
+
+  .stepper button{
+    appearance:none;
+    border:0;
+    background:transparent;
+    width:34px;
+    height:38px;
+    font-size:16px;
+    line-height:1;
+    color:#6b6357;
+    cursor:pointer;
+    transition:background .14s ease;
+  }
+  .stepper button:hover{background:#f0eade}
+  .stepper button:active{background:#e8e1d3}
+
+  .stepper input{
+    appearance:none;
+    -moz-appearance:textfield;
+    border:0;
+    background:transparent;
+    width:74px;
+    height:38px;
+    text-align:center;
+    font-size:14px;
+    font-weight:600;
+    color:var(--ink);
+    font-variant-numeric:tabular-nums;
+    outline:none;
+  }
+  .stepper input::-webkit-outer-spin-button,
+  .stepper input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
+
+  .chips{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    margin-top:11px;
+  }
+
+  .chip{
+    appearance:none;
+    font-size:12px;
+    font-weight:600;
+    padding:4px 11px;
+    border-radius:999px;
+    border:1px solid #ded6c7;
+    background:#faf7f1;
+    color:#6b6357;
+    cursor:pointer;
+    transition:all .14s ease;
+  }
+  .chip:hover{border-color:#c9bda7}
+  .chip.active{
+    background:var(--ink);
+    border-color:var(--ink);
+    color:#f7f3ea;
+  }
+
+  .field-hint{
+    margin-top:11px;
+    font-size:12.5px;
+    color:#a2988a;
+  }
+
+  .reset-link{
+    appearance:none;
+    border:0;
+    background:none;
+    padding:0;
+    font-size:12.5px;
+    color:var(--bad);
+    cursor:pointer;
+    text-decoration:underline;
+    text-underline-offset:3px;
+    opacity:.85;
+  }
+  .reset-link:hover{opacity:1}
+
+  /* ---------- рабочие ссылки ---------- */
+
+  .working-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:11px 0;
+    border-top:1px solid var(--line-soft);
+  }
+  .working-item:first-child{border-top:0; padding-top:2px}
+
+  .working-num{
+    flex:none;
+    width:20px;
+    font-family:var(--mono);
+    font-size:11px;
+    font-weight:600;
+    color:#b3aa9c;
+    font-variant-numeric:tabular-nums;
+  }
+
+  .working-url{
+    flex:1;
+    min-width:0;
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:#2a2620;
+    word-break:break-all;
+    overflow-wrap:anywhere;
+  }
+
+  .working-item .btn-xs{flex:none}
+
+  .empty{
+    color:#a2988a;
+    font-size:14px;
+    padding:6px 0;
+  }
+
+  /* ---------- подвал ---------- */
+
+  .site-foot{
+    margin-top:46px;
+    padding-top:22px;
+    border-top:1px solid var(--line);
+    font-size:12.5px;
+    color:#a89e90;
+    display:flex;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+
+  /* ---------- тост ---------- */
+
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:26px;
+    z-index:50;
+    transform:translate(-50%, 12px);
+    background:var(--ink);
+    color:#f7f3ea;
+    font-size:13px;
+    padding:9px 16px;
+    border-radius:8px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .toast.show{opacity:1; transform:translate(-50%, 0)}
+
+  /* ---------- адаптив ---------- */
+
+  @media (max-width:780px){
+    .wrap{padding:0 16px 70px}
+    .site-head{padding:44px 0 28px}
+    .results{grid-template-columns:1fr}
+    .stats{margin-left:0; width:100%}
+    .bar{padding:14px}
+    .panel{padding:18px 16px 20px}
+    .working-item{flex-wrap:wrap}
+    .working-url{flex-basis:100%; order:3}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important; animation:none !important}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="site-head">
+    <div class="eyebrow">s2.ubmops.top</div>
+    <h1>Генератор подписок</h1>
+    <p class="lede">
+      Собирает ссылки партиями. Рабочие уходят в отдельный список, нерабочие
+      скрываются навсегда и больше не выпадают при генерации.
+    </p>
+  </header>
+
+  <div class="bar">
+    <button type="button" class="btn-primary" id="generate">Сгенерировать</button>
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <div class="empty-state" id="results-empty">
+    Пока пусто. Нажмите «Сгенерировать», чтобы получить первую партию.
+  </div>
+
+  <div class="results" id="results" hidden>
+    <div class="col" id="col-left"></div>
+    <div class="col" id="col-right"></div>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Настройки</h2>
+    </div>
+
+    <div class="fields">
+      <div class="field">
+        <div class="field-label">Длина хвоста</div>
+        <div class="stepper">
+          <button type="button" data-step="-1" aria-label="Уменьшить">−</button>
+          <input type="number" id="input-length" min="8" max="128" step="1" value="64" inputmode="numeric">
+          <button type="button" data-step="1" aria-label="Увеличить">+</button>
+        </div>
+        <div class="chips" id="length-chips">
+          <button type="button" class="chip" data-len="16">16</button>
+          <button type="button" class="chip" data-len="32">32</button>
+          <button type="button" class="chip" data-len="48">48</button>
+          <button type="button" class="chip" data-len="64">64</button>
+          <button type="button" class="chip" data-len="96">96</button>
+          <button type="button" class="chip" data-len="128">128</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Ссылок за раз</div>
+        <div class="stepper">
+          <button type="button" data-step="-1" aria-label="Уменьшить">−</button>
+          <input type="number" id="input-count" min="2" max="50" step="1" value="10" inputmode="numeric">
+          <button type="button" data-step="1" aria-label="Увеличить">+</button>
+        </div>
+        <div class="field-hint">
+          Чётное число делится поровну между колонками.
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Скрытые ссылки</div>
+        <div class="field-hint" style="margin-top:0">
+          <span id="hidden-count">0</span> шт. в чёрном списке.
+        </div>
+        <div style="margin-top:10px">
+          <button type="button" class="reset-link" id="clear-hidden">Очистить чёрный список</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Рабочие ссылки</h2>
+      <span class="badge" id="working-count">0</span>
+      <div class="grow"></div>
+      <button type="button" class="btn-xs" id="copy-working">Копировать все</button>
+      <button type="button" class="btn-xs danger" id="clear-working">Очистить</button>
+    </div>
+    <div id="working-list"></div>
+  </section>
+
+  <footer class="site-foot">
+    <span>Все данные хранятся локально в вашем браузере.</span>
+    <span>s2.ubmops.top</span>
+  </footer>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var PREFIX = 's2.ubmops.top/';
+  var ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+  var STORE_KEY = 'vpn-link-generator.v1';
+  var MAX_SEEN = 5000;
+  var LEN_MIN = 8, LEN_MAX = 128;
+  var CNT_MIN = 2, CNT_MAX = 50;
+
+  /* ---------------- утилиты ---------------- */
+
+  function clampInt(value, min, max, fallback) {
+    var n = parseInt(value, 10);
+    if (!isFinite(n)) return fallback;
+    if (n < min) return min;
+    if (n > max) return max;
+    return n;
+  }
+
+  function isString(v) { return typeof v === 'string' && v.length > 0; }
+
+  function isBatchItem(v) {
+    return v && typeof v === 'object' &&
+           isString(v.url) && v.url.indexOf(PREFIX) === 0;
+  }
+
+  function defaults() {
+    return {
+      settings: { length: 64, count: 10 },
+      batch: [],
+      working: [],
+      hidden: [],
+      seen: []
+    };
+  }
+
+  /* ---------------- состояние ---------------- */
+
+  function load() {
+    var base = defaults();
+    var raw;
+    try { raw = localStorage.getItem(STORE_KEY); } catch (e) { raw = null; }
+    if (!raw) return base;
+
+    var parsed;
+    try { parsed = JSON.parse(raw); } catch (e) { return base; }
+    if (!parsed || typeof parsed !== 'object') return base;
+
+    var s = parsed.settings || {};
+
+    return {
+      settings: {
+        length: clampInt(s.length, LEN_MIN, LEN_MAX, base.settings.length),
+        count: clampInt(s.count, CNT_MIN, CNT_MAX, base.settings.count)
+      },
+      batch: Array.isArray(parsed.batch) ? parsed.batch.filter(isBatchItem) : [],
+      working: Array.isArray(parsed.working) ? parsed.working.filter(isString) : [],
+      hidden: Array.isArray(parsed.hidden) ? parsed.hidden.filter(isString) : [],
+      seen: Array.isArray(parsed.seen) ? parsed.seen.filter(isString) : []
+    };
+  }
+
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+    catch (e) { /* переполнение хранилища — молча продолжаем */ }
+  }
+
+  var state = load();
+
+  /* ---------------- генерация ---------------- */
+
+  function randomSuffix(n) {
+    var out = '';
+    var i;
+
+    if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
+      var buf = new Uint32Array(n);
+      window.crypto.getRandomValues(buf);
+      for (i = 0; i < n; i++) out += ALPHABET.charAt(buf[i] & 63);
+    } else {
+      for (i = 0; i < n; i++) {
+        out += ALPHABET.charAt(Math.floor(Math.random() * 64));
+      }
+    }
+    return out;
+  }
+
+  function generate() {
+    var length = state.settings.length;
+    var count = state.settings.count;
+
+    var hiddenSet = new Set(state.hidden);
+    var workingSet = new Set(state.working);
+    var seenSet = new Set(state.seen);
+
+    var batch = [];
+    var inBatch = new Set();
+    var guard = 0;
+    var maxGuard = count * 400;
+
+    while (batch.length < count && guard < maxGuard) {
+      guard++;
+      var url = PREFIX + randomSuffix(length);
+      if (hiddenSet.has(url) || workingSet.has(url) || inBatch.has(url)) continue;
+      inBatch.add(url);
+      batch.push({ url: url, status: 'new', duplicate: seenSet.has(url) });
+    }
+
+    for (var i = 0; i < batch.length; i++) {
+      if (!seenSet.has(batch[i].url)) {
+        seenSet.add(batch[i].url);
+        state.seen.push(batch[i].url);
+      }
+    }
+
+    if (state.seen.length > MAX_SEEN) {
+      state.seen = state.seen.slice(state.seen.length - MAX_SEEN);
+    }
+
+    state.batch = batch;
+    save();
+    render();
+  }
+
+  /* ---------------- разметка карточек ---------------- */
+
+  function buildCard(item, index) {
+    var card = document.createElement('article');
+    card.className = 'link-card';
+    if (item.status === 'working') card.classList.add('is-working');
+
+    var num = document.createElement('div');
+    num.className = 'link-num';
+    num.textContent = index < 10 ? '0' + index : String(index);
+
+    var body = document.createElement('div');
+    body.className = 'link-body';
+
+    var text = document.createElement('div');
+    text.className = 'link-text';
+    var pre = document.createElement('span');
+    pre.className = 'link-prefix';
+    pre.textContent = PREFIX;
+    text.appendChild(pre);
+    text.appendChild(document.createTextNode(item.url.slice(PREFIX.length)));
+
+    var meta = document.createElement('div');
+    meta.className = 'link-meta';
+
+    var len = document.createElement('span');
+    len.className = 'link-len';
+    len.textContent = (item.url.length - PREFIX.length) + ' симв.';
+    meta.appendChild(len);
+
+    if (item.status === 'working') {
+      var okPill = document.createElement('span');
+      okPill.className = 'pill ok';
+      okPill.textContent = 'рабочая';
+      meta.appendChild(okPill);
+    }
+
+    if (item.duplicate) {
+      var dupPill = document.createElement('span');
+      dupPill.className = 'pill dup';
+      dupPill.textContent = 'повтор';
+      meta.appendChild(dupPill);
+    }
+
+    var actions = document.createElement('div');
+    actions.className = 'link-actions';
+
+    var copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.className = 'btn-xs';
+    copyBtn.textContent = 'Копировать';
+    copyBtn.addEventListener('click', function () {
+      copyText(item.url);
+    });
+    actions.appendChild(copyBtn);
+
+    if (item.status !== 'working') {
+      var okBtn = document.createElement('button');
+      okBtn.type = 'button';
+      okBtn.className = 'btn-xs ok';
+      okBtn.textContent = 'Работает';
+      okBtn.addEventListener('click', function () {
+        markWorking(item.url, okBtn);
+      });
+      actions.appendChild(okBtn);
+
+      var badBtn = document.createElement('button');
+      badBtn.type = 'button';
+      badBtn.className = 'btn-xs bad';
+      badBtn.textContent = 'Не работает';
+      badBtn.addEventListener('click', function () {
+        markBroken(item.url, card, badBtn);
+      });
+      actions.appendChild(badBtn);
+    }
+
+    body.appendChild(text);
+    body.appendChild(meta);
+    body.appendChild(actions);
+
+    card.appendChild(num);
+    card.appendChild(body);
+
+    return card;
+  }
+
+  function renderResults() {
+    var left = document.getElementById('col-left');
+    var right = document.getElementById('col-right');
+    var results = document.getElementById('results');
+    var empty = document.getElementById('results-empty');
+
+    left.textContent = '';
+    right.textContent = '';
+
+    var batch = state.batch;
+    if (!batch.length) {
+      results.hidden = true;
+      empty.hidden = false;
+      return;
+    }
+
+    results.hidden = false;
+    empty.hidden = true;
+
+    var half = Math.ceil(batch.length / 2);
+    for (var i = 0; i < batch.length; i++) {
+      var card = buildCard(batch[i], i + 1);
+      if (i < half) left.appendChild(card);
+      else right.appendChild(card);
+    }
+  }
+
+  function renderWorking() {
+    var list = document.getElementById('working-list');
+    var countEl = document.getElementById('working-count');
+
+    countEl.textContent = String(state.working.length);
+    list.textContent = '';
+
+    if (!state.working.length) {
+      var p = document.createElement('div');
+      p.className = 'empty';
+      p.textContent = 'Здесь появятся ссылки, которые вы отметите как рабочие.';
+      list.appendChild(p);
+      return;
+    }
+
+    for (var i = 0; i < state.working.length; i++) {
+      (function (url, idx) {
+        var row = document.createElement('div');
+        row.className = 'working-item';
+
+        var num = document.createElement('span');
+        num.className = 'working-num';
+        num.textContent = idx < 10 ? '0' + (idx + 1) : String(idx + 1);
+
+        var link = document.createElement('span');
+        link.className = 'working-url';
+        link.textContent = url;
+
+        var copyBtn = document.createElement('button');
+        copyBtn.type = 'button';
+        copyBtn.className = 'btn-xs';
+        copyBtn.textContent = 'Копировать';
+        copyBtn.addEventListener('click', function () { copyText(url); });
+
+        var delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'btn-xs danger';
+        delBtn.textContent = 'Убрать';
+        delBtn.addEventListener('click', function () { removeWorking(url); });
+
+        row.appendChild(num);
+        row.appendChild(link);
+        row.appendChild(copyBtn);
+        row.appendChild(delBtn);
+        list.appendChild(row);
+      })(state.working[i], i);
+    }
+  }
+
+  function renderStats() {
+    var stats = document.getElementById('stats');
+    stats.textContent = '';
+
+    var wLabel = document.createElement('span');
+    wLabel.appendChild(document.createTextNode('рабочих: '));
+    var wVal = document.createElement('b');
+    wVal.textContent = String(state.working.length);
+    wLabel.appendChild(wVal);
+
+    var hLabel = document.createElement('span');
+    hLabel.appendChild(document.createTextNode('скрытых: '));
+    var hVal = document.createElement('b');
+    hVal.textContent = String(state.hidden.length);
+    hLabel.appendChild(hVal);
+
+    stats.appendChild(wLabel);
+    stats.appendChild(hLabel);
+
+    document.getElementById('hidden-count').textContent = String(state.hidden.length);
+  }
+
+  function renderSettings() {
+    document.getElementById('input-length').value = String(state.settings.length);
+    document.getElementById('input-count').value = String(state.settings.count);
+    syncChips();
+  }
+
+  function syncChips() {
+    var chips = document.querySelectorAll('#length-chips .chip');
+    for (var i = 0; i < chips.length; i++) {
+      var len = parseInt(chips[i].getAttribute('data-len'), 10);
+      chips[i].classList.toggle('active', len === state.settings.length);
+    }
+  }
+
+  function render() {
+    renderResults();
+    renderWorking();
+    renderStats();
+    renderSettings();
+  }
+
+  /* ---------------- действия ---------------- */
+
+  function markWorking(url, btn) {
+    if (state.working.indexOf(url) !== -1) return;
+    if (btn) btn.disabled = true;
+
+    state.working.push(url);
+
+    for (var i = 0; i < state.batch.length; i++) {
+      if (state.batch[i].url === url) {
+        state.batch[i].status = 'working';
+        break;
+      }
+    }
+
+    save();
+    render();
+    toast('Отмечено как рабочая');
+  }
+
+  function markBroken(url, card, btn) {
+    if (btn) btn.disabled = true;
+    card.classList.add('is-out');
+
+    var buttons = card.querySelectorAll('button');
+    for (var i = 0; i < buttons.length; i++) buttons[i].disabled = true;
+
+    window.setTimeout(function () {
+      if (state.hidden.indexOf(url) === -1) state.hidden.push(url);
+
+      var next = [];
+      for (var j = 0; j < state.batch.length; j++) {
+        if (state.batch[j].url !== url) next.push(state.batch[j]);
+      }
+      state.batch = next;
+
+      var w = state.working.indexOf(url);
+      if (w !== -1) state.working.splice(w, 1);
+
+      save();
+      render();
+      toast('Скрыто. Больше не появится.');
+    }, 180);
+  }
+
+  function removeWorking(url) {
+    var idx = state.working.indexOf(url);
+    if (idx === -1) return;
+    state.working.splice(idx, 1);
+
+    for (var i = 0; i < state.batch.length; i++) {
+      if (state.batch[i].url === url) {
+        state.batch[i].status = 'new';
+        break;
+      }
+    }
+
+    save();
+    render();
+    toast('Убрано из списка');
+  }
+
+  function copyText(text) {
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.top = '-1000px';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) { /* ignore */ }
+      document.body.removeChild(ta);
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        toast('Скопировано');
+      }).catch(function () {
+        fallback();
+        toast('Скопировано');
+      });
+    } else {
+      fallback();
+      toast('Скопировано');
+    }
+  }
+
+  var toastTimer = null;
+  function toast(message) {
+    var el = document.getElementById('toast');
+    el.textContent = message;
+    el.classList.add('show');
+    if (toastTimer) window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(function () {
+      el.classList.remove('show');
+    }, 1700);
+  }
+
+  /* ---------------- привязка событий ---------------- */
+
+  document.getElementById('generate').addEventListener('click', generate);
+
+  // степперы
+  var steppers = document.querySelectorAll('.stepper');
+  for (var s = 0; s < steppers.length; s++) {
+    (function (stepper) {
+      var input = stepper.querySelector('input');
+      var buttons = stepper.querySelectorAll('button');
+      for (var b = 0; b < buttons.length; b++) {
+        (function (btn) {
+          btn.addEventListener('click', function () {
+            var min = parseInt(input.min, 10);
+            var max = parseInt(input.max, 10);
+            var current = clampInt(input.value, min, max, min);
+            var next = clampInt(current + parseInt(btn.getAttribute('data-step'), 10), min, max, current);
+            input.value = String(next);
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+          });
+        })(buttons[b]);
+      }
+    })(steppers[s]);
+  }
+
+  document.getElementById('input-length').addEventListener('change', function () {
+    state.settings.length = clampInt(this.value, LEN_MIN, LEN_MAX, state.settings.length);
+    this.value = String(state.settings.length);
+    syncChips();
+    save();
+  });
+
+  document.getElementById('input-count').addEventListener('change', function () {
+    state.settings.count = clampInt(this.value, CNT_MIN, CNT_MAX, state.settings.count);
+    this.value = String(state.settings.count);
+    save();
+  });
+
+  var chips = document.querySelectorAll('#length-chips .chip');
+  for (var c = 0; c < chips.length; c++) {
+    (function (chip) {
+      chip.addEventListener('click', function () {
+        state.settings.length = parseInt(chip.getAttribute('data-len'), 10);
+        document.getElementById('input-length').value = String(state.settings.length);
+        syncChips();
+        save();
+      });
+    })(chips[c]);
+  }
+
+  document.getElementById('copy-working').addEventListener('click', function () {
+    if (!state.working.length) { toast('Список пуст'); return; }
+    copyText(state.working.join('\n'));
+  });
+
+  document.getElementById('clear-working').addEventListener('click', function () {
+    if (!state.working.length) { toast('Список пуст'); return; }
+    if (!window.confirm('Очистить список рабочих ссылок?')) return;
+    state.working = [];
+    for (var i = 0; i < state.batch.length; i++) {
+      if (state.batch[i].status === 'working') state.batch[i].status = 'new';
+    }
+    save();
+    render();
+    toast('Список очищен');
+  });
+
+  document.getElementById('clear-hidden').addEventListener('click', function () {
+    if (!state.hidden.length) { toast('Список пуст'); return; }
+    if (!window.confirm('Очистить чёрный список? Скрытые ссылки смогут появиться снова.')) return;
+    state.hidden = [];
+    save();
+    render();
+    toast('Чёрный список очищен');
+  });
+
+  /* ---------------- старт ---------------- */
+
+  render();
+})();
+</script>
+</body>
+</html>
