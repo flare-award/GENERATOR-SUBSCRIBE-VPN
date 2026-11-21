@@ -578,7 +578,8 @@
 (function () {
   'use strict';
 
-  var PREFIX = 's2.ubmops.top/';
+  var PREFIX = 'https://s2.ubmops.top/';
+  var LEGACY_PREFIX = 's2.ubmops.top/';
   var ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
   var STORE_KEY = 'vpn-link-generator.v1';
   var MAX_SEEN = 5000;
@@ -597,9 +598,23 @@
 
   function isString(v) { return typeof v === 'string' && v.length > 0; }
 
-  function isBatchItem(v) {
-    return v && typeof v === 'object' &&
-           isString(v.url) && v.url.indexOf(PREFIX) === 0;
+  /* Приводит старую ссылку (без https://) к новому виду. */
+  function upgradeUrl(url) {
+    if (!isString(url)) return null;
+    if (url.indexOf(PREFIX) === 0) return url;
+    if (url.indexOf(LEGACY_PREFIX) === 0) return 'https://' + url;
+    return null;
+  }
+
+  function upgradeBatchItem(item) {
+    if (!item || typeof item !== 'object') return null;
+    var url = upgradeUrl(item.url);
+    if (!url) return null;
+    return {
+      url: url,
+      status: item.status || 'new',
+      duplicate: !!item.duplicate
+    };
   }
 
   function defaults() {
@@ -631,10 +646,18 @@
         length: clampInt(s.length, LEN_MIN, LEN_MAX, base.settings.length),
         count: clampInt(s.count, CNT_MIN, CNT_MAX, base.settings.count)
       },
-      batch: Array.isArray(parsed.batch) ? parsed.batch.filter(isBatchItem) : [],
-      working: Array.isArray(parsed.working) ? parsed.working.filter(isString) : [],
-      hidden: Array.isArray(parsed.hidden) ? parsed.hidden.filter(isString) : [],
-      seen: Array.isArray(parsed.seen) ? parsed.seen.filter(isString) : []
+      batch: Array.isArray(parsed.batch)
+        ? parsed.batch.map(upgradeBatchItem).filter(Boolean)
+        : [],
+      working: Array.isArray(parsed.working)
+        ? parsed.working.map(upgradeUrl).filter(Boolean)
+        : [],
+      hidden: Array.isArray(parsed.hidden)
+        ? parsed.hidden.map(upgradeUrl).filter(Boolean)
+        : [],
+      seen: Array.isArray(parsed.seen)
+        ? parsed.seen.map(upgradeUrl).filter(Boolean)
+        : []
     };
   }
 
