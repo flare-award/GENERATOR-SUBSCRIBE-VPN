@@ -3,20 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="dark">
 <title>Генератор подписок</title>
 <style>
   :root{
-    --paper:#172128;
-    --card:#31383d;
-    --ink:#ba4eac;
-    --ink-soft:#4a443c;
-    --muted:#7c746a;
-    --line:#3e454a;
-    --line-soft:#ece6d9;
-    --line-strong:#d3c9b5;
-    --ok:#3e6b4d;
-    --bad:#9c4634;
+    color-scheme: dark;
+
+    --paper:#13110c;
+    --card:#1c1913;
+    --card-2:#221e17;
+    --ink:#ede7d7;
+    --ink-soft:#b8b0a0;
+    --muted:#7a7166;
+    --line:#2a2620;
+    --line-soft:#211d16;
+    --line-strong:#3a3429;
+    --ok:#7fb890;
+    --bad:#d4806a;
+
     --mono:ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
     --serif:Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, serif;
   }
@@ -56,7 +60,7 @@
     letter-spacing:.18em;
     text-transform:uppercase;
     font-weight:700;
-    color:#faf0e1;
+    color:#8a7c60;
     margin-bottom:14px;
   }
 
@@ -67,6 +71,7 @@
     line-height:1.08;
     letter-spacing:-.015em;
     margin:0 0 14px;
+    color:var(--ink);
   }
 
   .lede{
@@ -94,7 +99,7 @@
     appearance:none;
     border:1px solid var(--ink);
     background:var(--ink);
-    color:#f7f3ea;
+    color:var(--paper);
     font-size:14px;
     font-weight:600;
     letter-spacing:.01em;
@@ -103,7 +108,7 @@
     cursor:pointer;
     transition:background .16s ease, transform .1s ease;
   }
-  .btn-primary:hover{background:#35302a}
+  .btn-primary:hover{background:#f5f0e2; border-color:#f5f0e2}
   .btn-primary:active{transform:translateY(1px)}
 
   .stats{
@@ -140,9 +145,9 @@
     margin-top:20px;
     padding:38px 20px;
     text-align:center;
-    color:#8f8678;
+    color:var(--muted);
     font-size:14px;
-    background:#fbf8f2;
+    background:var(--card);
     border:1px dashed var(--line-strong);
     border-radius:12px;
   }
@@ -159,8 +164,8 @@
   }
 
   .link-card.is-working{
-    border-color:#c3d8c9;
-    background:#f8fbf8;
+    border-color:#2a3a2e;
+    background:#18201a;
   }
 
   .link-card.is-out{
@@ -176,7 +181,7 @@
     font-family:var(--mono);
     font-size:11px;
     font-weight:600;
-    color:#b3aa9c;
+    color:#5a5348;
     font-variant-numeric:tabular-nums;
   }
 
@@ -186,12 +191,12 @@
     font-family:var(--mono);
     font-size:12.5px;
     line-height:1.55;
-    color:#63aed1;
+    color:#d6d0c0;
     word-break:break-all;
     overflow-wrap:anywhere;
   }
 
-  .link-prefix{color:#65b4d9}
+  .link-prefix{color:#5a5348}
 
   .link-meta{
     display:flex;
@@ -203,7 +208,7 @@
 
   .link-len{
     font-size:11.5px;
-    color:#65b4d9;
+    color:#5a5348;
     font-variant-numeric:tabular-nums;
   }
 
@@ -218,8 +223,8 @@
     border-radius:999px;
     white-space:nowrap;
   }
-  .pill.ok{background:#e4efe6; color:#33604a}
-  .pill.dup{background:#f5edda; color:#8a6a34}
+  .pill.ok{background:rgba(127,184,144,.13); color:#a3c9af}
+  .pill.dup{background:rgba(201,165,92,.13); color:#d4b06a}
 
   .link-actions{
     display:flex;
@@ -236,17 +241,17 @@
     padding:5px 10px;
     border-radius:6px;
     cursor:pointer;
-    border:1px solid #ded6c7;
-    background:#faf7f1;
+    border:1px solid #3a342a;
+    background:#1f1b15;
     color:var(--ink-soft);
     transition:background .14s ease, border-color .14s ease, color .14s ease;
   }
-  .btn-xs:hover{border-color:#c9bda7; background:#f3eee4}
-  .btn-xs:disabled{opacity:.45; cursor:default}
-  .btn-xs:disabled:hover{border-color:#ded6c7; background:#faf7f1}
-  .btn-xs.ok:hover{border-color:var(--ok); color:#2f5a3d; background:#eef4ef}
-  .btn-xs.bad:hover{border-color:var(--bad); color:#8a3b2b; background:#f8eeeb}
-  .btn-xs.danger:hover{border-color:var(--bad); color:#8a3b2b; background:#f8eeeb}
+  .btn-xs:hover{border-color:#4a443a; background:#252018}
+  .btn-xs:disabled{opacity:.4; cursor:default}
+  .btn-xs:disabled:hover{border-color:#3a342a; background:#1f1b15}
+  .btn-xs.ok:hover{border-color:var(--ok); color:var(--ok); background:rgba(127,184,144,.08)}
+  .btn-xs.bad:hover{border-color:var(--bad); color:var(--bad); background:rgba(212,128,106,.08)}
+  .btn-xs.danger:hover{border-color:var(--bad); color:var(--bad); background:rgba(212,128,106,.08)}
 
   /* ---------- панели ---------- */
 
@@ -263,7 +268,7 @@
     align-items:center;
     gap:10px;
     flex-wrap:wrap;
-    margin-bottom:18px;
+    margin-bottom:14px;
   }
 
   .panel-head h2{
@@ -272,123 +277,27 @@
     font-size:19px;
     letter-spacing:-.01em;
     margin:0;
+    color:var(--ink);
   }
 
   .badge{
     font-size:11px;
     font-weight:700;
     font-variant-numeric:tabular-nums;
-    color:#8a8175;
-    background:#f2ece0;
+    color:#a89e88;
+    background:#252018;
     border-radius:999px;
     padding:2px 8px;
   }
 
+  .panel-note{
+    margin:0;
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.55;
+  }
+
   .grow{flex:1}
-
-  /* ---------- настройки ---------- */
-
-  .fields{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
-    gap:26px 34px;
-  }
-
-  .field-label{
-    font-size:11px;
-    font-weight:700;
-    letter-spacing:.14em;
-    text-transform:uppercase;
-    color:#8f8678;
-    margin-bottom:9px;
-  }
-
-  .stepper{
-    display:inline-flex;
-    align-items:center;
-    border:1px solid #ded6c7;
-    border-radius:8px;
-    background:#faf7f1;
-    overflow:hidden;
-  }
-
-  .stepper button{
-    appearance:none;
-    border:0;
-    background:transparent;
-    width:34px;
-    height:38px;
-    font-size:16px;
-    line-height:1;
-    color:#6b6357;
-    cursor:pointer;
-    transition:background .14s ease;
-  }
-  .stepper button:hover{background:#f0eade}
-  .stepper button:active{background:#e8e1d3}
-
-  .stepper input{
-    appearance:none;
-    -moz-appearance:textfield;
-    border:0;
-    background:transparent;
-    width:74px;
-    height:38px;
-    text-align:center;
-    font-size:14px;
-    font-weight:600;
-    color:var(--ink);
-    font-variant-numeric:tabular-nums;
-    outline:none;
-  }
-  .stepper input::-webkit-outer-spin-button,
-  .stepper input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
-
-  .chips{
-    display:flex;
-    gap:6px;
-    flex-wrap:wrap;
-    margin-top:11px;
-  }
-
-  .chip{
-    appearance:none;
-    font-size:12px;
-    font-weight:600;
-    padding:4px 11px;
-    border-radius:999px;
-    border:1px solid #ded6c7;
-    background:#faf7f1;
-    color:#6b6357;
-    cursor:pointer;
-    transition:all .14s ease;
-  }
-  .chip:hover{border-color:#c9bda7}
-  .chip.active{
-    background:var(--ink);
-    border-color:var(--ink);
-    color:#f7f3ea;
-  }
-
-  .field-hint{
-    margin-top:11px;
-    font-size:12.5px;
-    color:#faf0e1;
-  }
-
-  .reset-link{
-    appearance:none;
-    border:0;
-    background:none;
-    padding:0;
-    font-size:12.5px;
-    color:var(--bad);
-    cursor:pointer;
-    text-decoration:underline;
-    text-underline-offset:3px;
-    opacity:.85;
-  }
-  .reset-link:hover{opacity:1}
 
   /* ---------- рабочие ссылки ---------- */
 
@@ -407,7 +316,7 @@
     font-family:var(--mono);
     font-size:11px;
     font-weight:600;
-    color:#b3aa9c;
+    color:#5a5348;
     font-variant-numeric:tabular-nums;
   }
 
@@ -416,7 +325,7 @@
     min-width:0;
     font-family:var(--mono);
     font-size:12.5px;
-    color:#63aed1;
+    color:#d6d0c0;
     word-break:break-all;
     overflow-wrap:anywhere;
   }
@@ -424,9 +333,10 @@
   .working-item .btn-xs{flex:none}
 
   .empty{
-    color:#faf0e1;
+    color:var(--muted);
     font-size:14px;
     padding:6px 0;
+    margin:0;
   }
 
   /* ---------- подвал ---------- */
@@ -436,7 +346,7 @@
     padding-top:22px;
     border-top:1px solid var(--line);
     font-size:12.5px;
-    color:#65b4d9;
+    color:#5a5348;
     display:flex;
     justify-content:space-between;
     gap:16px;
@@ -452,8 +362,9 @@
     z-index:50;
     transform:translate(-50%, 12px);
     background:var(--ink);
-    color:#f7f3ea;
+    color:var(--paper);
     font-size:13px;
+    font-weight:500;
     padding:9px 16px;
     border-radius:8px;
     opacity:0;
@@ -488,8 +399,8 @@
     <div class="eyebrow">s2.ubmops.top</div>
     <h1>Генератор подписок</h1>
     <p class="lede">
-      Собирает ссылки партиями. Рабочие уходят в отдельный список, нерабочие
-      скрываются навсегда и больше не выпадают при генерации.
+      Собирает ссылки партиями по 10 штук — по 5 в каждой колонке.
+      Рабочие уходят в отдельный список, нерабочие скрываются навсегда.
     </p>
   </header>
 
@@ -509,53 +420,6 @@
 
   <section class="panel">
     <div class="panel-head">
-      <h2>Настройки</h2>
-    </div>
-
-    <div class="fields">
-      <div class="field">
-        <div class="field-label">Длина хвоста</div>
-        <div class="stepper">
-          <button type="button" data-step="-1" aria-label="Уменьшить">−</button>
-          <input type="number" id="input-length" min="8" max="128" step="1" value="64" inputmode="numeric">
-          <button type="button" data-step="1" aria-label="Увеличить">+</button>
-        </div>
-        <div class="chips" id="length-chips">
-          <button type="button" class="chip" data-len="16">16</button>
-          <button type="button" class="chip" data-len="32">32</button>
-          <button type="button" class="chip" data-len="48">48</button>
-          <button type="button" class="chip" data-len="64">64</button>
-          <button type="button" class="chip" data-len="96">96</button>
-          <button type="button" class="chip" data-len="128">128</button>
-        </div>
-      </div>
-
-      <div class="field">
-        <div class="field-label">Ссылок за раз</div>
-        <div class="stepper">
-          <button type="button" data-step="-1" aria-label="Уменьшить">−</button>
-          <input type="number" id="input-count" min="2" max="50" step="1" value="10" inputmode="numeric">
-          <button type="button" data-step="1" aria-label="Увеличить">+</button>
-        </div>
-        <div class="field-hint">
-          Чётное число делится поровну между колонками.
-        </div>
-      </div>
-
-      <div class="field">
-        <div class="field-label">Скрытые ссылки</div>
-        <div class="field-hint" style="margin-top:0">
-          <span id="hidden-count">0</span> шт. в чёрном списке.
-        </div>
-        <div style="margin-top:10px">
-          <button type="button" class="reset-link" id="clear-hidden">Очистить чёрный список</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="panel">
-    <div class="panel-head">
       <h2>Рабочие ссылки</h2>
       <span class="badge" id="working-count">0</span>
       <div class="grow"></div>
@@ -563,6 +427,18 @@
       <button type="button" class="btn-xs danger" id="clear-working">Очистить</button>
     </div>
     <div id="working-list"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Скрытые ссылки</h2>
+      <span class="badge" id="hidden-count">0</span>
+      <div class="grow"></div>
+      <button type="button" class="btn-xs danger" id="clear-hidden">Очистить</button>
+    </div>
+    <p class="panel-note">
+      Скрытые ссылки больше не появляются в новых генерациях. Очистка вернёт их в оборот.
+    </p>
   </section>
 
   <footer class="site-foot">
@@ -583,18 +459,12 @@
   var ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
   var STORE_KEY = 'vpn-link-generator.v1';
   var MAX_SEEN = 5000;
-  var LEN_MIN = 8, LEN_MAX = 128;
-  var CNT_MIN = 2, CNT_MAX = 50;
+
+  /* фиксированный формат генерации */
+  var LENGTH = 64;
+  var COUNT = 10;
 
   /* ---------------- утилиты ---------------- */
-
-  function clampInt(value, min, max, fallback) {
-    var n = parseInt(value, 10);
-    if (!isFinite(n)) return fallback;
-    if (n < min) return min;
-    if (n > max) return max;
-    return n;
-  }
 
   function isString(v) { return typeof v === 'string' && v.length > 0; }
 
@@ -619,7 +489,6 @@
 
   function defaults() {
     return {
-      settings: { length: 64, count: 10 },
       batch: [],
       working: [],
       hidden: [],
@@ -639,13 +508,7 @@
     try { parsed = JSON.parse(raw); } catch (e) { return base; }
     if (!parsed || typeof parsed !== 'object') return base;
 
-    var s = parsed.settings || {};
-
     return {
-      settings: {
-        length: clampInt(s.length, LEN_MIN, LEN_MAX, base.settings.length),
-        count: clampInt(s.count, CNT_MIN, CNT_MAX, base.settings.count)
-      },
       batch: Array.isArray(parsed.batch)
         ? parsed.batch.map(upgradeBatchItem).filter(Boolean)
         : [],
@@ -687,9 +550,6 @@
   }
 
   function generate() {
-    var length = state.settings.length;
-    var count = state.settings.count;
-
     var hiddenSet = new Set(state.hidden);
     var workingSet = new Set(state.working);
     var seenSet = new Set(state.seen);
@@ -697,11 +557,11 @@
     var batch = [];
     var inBatch = new Set();
     var guard = 0;
-    var maxGuard = count * 400;
+    var maxGuard = COUNT * 400;
 
-    while (batch.length < count && guard < maxGuard) {
+    while (batch.length < COUNT && guard < maxGuard) {
       guard++;
-      var url = PREFIX + randomSuffix(length);
+      var url = PREFIX + randomSuffix(LENGTH);
       if (hiddenSet.has(url) || workingSet.has(url) || inBatch.has(url)) continue;
       inBatch.add(url);
       batch.push({ url: url, status: 'new', duplicate: seenSet.has(url) });
@@ -844,7 +704,7 @@
     list.textContent = '';
 
     if (!state.working.length) {
-      var p = document.createElement('div');
+      var p = document.createElement('p');
       p.className = 'empty';
       p.textContent = 'Здесь появятся ссылки, которые вы отметите как рабочие.';
       list.appendChild(p);
@@ -907,25 +767,10 @@
     document.getElementById('hidden-count').textContent = String(state.hidden.length);
   }
 
-  function renderSettings() {
-    document.getElementById('input-length').value = String(state.settings.length);
-    document.getElementById('input-count').value = String(state.settings.count);
-    syncChips();
-  }
-
-  function syncChips() {
-    var chips = document.querySelectorAll('#length-chips .chip');
-    for (var i = 0; i < chips.length; i++) {
-      var len = parseInt(chips[i].getAttribute('data-len'), 10);
-      chips[i].classList.toggle('active', len === state.settings.length);
-    }
-  }
-
   function render() {
     renderResults();
     renderWorking();
     renderStats();
-    renderSettings();
   }
 
   /* ---------------- действия ---------------- */
@@ -1031,52 +876,6 @@
   /* ---------------- привязка событий ---------------- */
 
   document.getElementById('generate').addEventListener('click', generate);
-
-  // степперы
-  var steppers = document.querySelectorAll('.stepper');
-  for (var s = 0; s < steppers.length; s++) {
-    (function (stepper) {
-      var input = stepper.querySelector('input');
-      var buttons = stepper.querySelectorAll('button');
-      for (var b = 0; b < buttons.length; b++) {
-        (function (btn) {
-          btn.addEventListener('click', function () {
-            var min = parseInt(input.min, 10);
-            var max = parseInt(input.max, 10);
-            var current = clampInt(input.value, min, max, min);
-            var next = clampInt(current + parseInt(btn.getAttribute('data-step'), 10), min, max, current);
-            input.value = String(next);
-            input.dispatchEvent(new Event('change', { bubbles: true }));
-          });
-        })(buttons[b]);
-      }
-    })(steppers[s]);
-  }
-
-  document.getElementById('input-length').addEventListener('change', function () {
-    state.settings.length = clampInt(this.value, LEN_MIN, LEN_MAX, state.settings.length);
-    this.value = String(state.settings.length);
-    syncChips();
-    save();
-  });
-
-  document.getElementById('input-count').addEventListener('change', function () {
-    state.settings.count = clampInt(this.value, CNT_MIN, CNT_MAX, state.settings.count);
-    this.value = String(state.settings.count);
-    save();
-  });
-
-  var chips = document.querySelectorAll('#length-chips .chip');
-  for (var c = 0; c < chips.length; c++) {
-    (function (chip) {
-      chip.addEventListener('click', function () {
-        state.settings.length = parseInt(chip.getAttribute('data-len'), 10);
-        document.getElementById('input-length').value = String(state.settings.length);
-        syncChips();
-        save();
-      });
-    })(chips[c]);
-  }
 
   document.getElementById('copy-working').addEventListener('click', function () {
     if (!state.working.length) { toast('Список пуст'); return; }
